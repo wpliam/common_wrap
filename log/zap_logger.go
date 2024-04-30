@@ -1,22 +1,31 @@
 package log
 
 import (
-	"fmt"
 	"github.com/natefinch/lumberjack"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"os"
 	"path/filepath"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func newZapLog() Logger {
+	// TODO linux不这样取
 	dir, _ := os.Getwd()
-	fmt.Printf("NewZapLog dir:%s \n", dir)
 	encoder := zapcore.NewConsoleEncoder(
 		zapcore.EncoderConfig{
-			EncodeTime: func(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
-				encoder.AppendString(t.Format("2006-01-02 15:04:05"))
+			TimeKey:        "time",
+			LevelKey:       "level",
+			NameKey:        "logger",
+			CallerKey:      "caller",
+			MessageKey:     "msg",
+			StacktraceKey:  "stacktrace",
+			LineEnding:     zapcore.DefaultLineEnding,
+			EncodeDuration: zapcore.SecondsDurationEncoder,
+			EncodeCaller:   zapcore.ShortCallerEncoder,
+			EncodeTime: func(t time.Time, encode zapcore.PrimitiveArrayEncoder) {
+				encode.AppendString(t.Format("2006-01-02 15:04:05"))
 			},
 			EncodeLevel: zapcore.CapitalLevelEncoder,
 		},
@@ -35,6 +44,7 @@ func newZapLog() Logger {
 	return &zapLog{
 		l: zap.New(
 			zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel),
+			zap.AddCallerSkip(2),
 			zap.AddCaller(),
 		),
 	}

@@ -3,9 +3,8 @@ package errs
 import "fmt"
 
 const (
-	RetOk           = 0
-	RetInvalidParam = 101
-	RetUnknown      = 999
+	RetOk      = 0
+	RetUnknown = 999
 )
 
 type Error struct {
